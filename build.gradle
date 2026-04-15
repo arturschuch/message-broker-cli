@@ -46,6 +46,10 @@ protobuf {
     }
 }
 
+application {
+    mainClass = "org.example.kafka.MessageBrokerCli"
+}
+
 test {
     useJUnitPlatform()
 }

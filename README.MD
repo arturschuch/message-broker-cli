@@ -1,45 +1,39 @@
-# Message Broker CLI Tool
+# Message Broker CLI
 
-## Overview
-This project implements a CLI tool in Java that sends a [Protocol Buffers (protobuf)](https://developers.google.com/protocol-buffers) message to a Kafka message broker. The tool reads a JSON file, converts its content into a protobuf message, and publishes it to Kafka. The solution is fully tested using integration tests with [Testcontainers](https://www.testcontainers.org/) to ensure that messages written to the broker are readable by a consumer.
+CLI tool in Java that reads a JSON payload, converts it to a Protocol Buffers `Person` message, and publishes it to Kafka.
 
-## Goals & Acceptance Criteria
-- **Goal:** Implement a CLI tool to send protobuf messages to a message broker (Kafka).
-- **Acceptance Criteria:**
-  - The CLI reads a JSON file (provided as a parameter).
-  - The JSON is converted to a protobuf `Person` message:
-    ```protobuf
-    message Person {
-      required string name = 1;
-      required int32 id = 2;
-      optional string email = 3;
-    }
-    ```
-  - The message is sent to Kafka.
-  - The message can be read by a consumer.
+## Features
 
-## Solution Highlights
-- **Language:** Java
-- **Broker:** Kafka
-- **Protobuf:** Used for message serialization
-- **Tested with Testcontainers:** Integration tests spin up a real Kafka broker in Docker, send a message, and verify it is consumed.
-- **Clean code:** Follows software engineering best practices and clean code principles.
+- Sends protobuf payloads to Kafka from the command line
+- Uses generated classes from `person.proto`
+- Includes integration tests with Testcontainers
 
-## How to Run
-I have a test where I demo Producer and consumer being used together, so you can run the integration test to see the full flow in action.
+## Prerequisites
 
-### Prerequisites
 - Java 21+
-- Docker (for running integration tests)
-- Gradle (or use the provided `gradlew` wrapper)
+- Docker (for integration tests)
 
-### Build the Project
+## Build
+
 ```sh
-./gradlew build
+./gradlew clean build
 ```
 
-### Example JSON Input
-Place a file like this at `src/test/resources/sample_person.json`:
+## Run as CLI
+
+```sh
+./gradlew run --args="--brokers localhost:9092 --topic person-topic --json src/test/resources/sample_person.json"
+```
+
+### Options
+
+- `--brokers` Kafka bootstrap servers (required)
+- `--topic` Kafka topic name (required)
+- `--json` Path to JSON file (required)
+- `--help` Show usage
+
+## Example JSON
+
 ```json
 {
   "name": "Alice",
@@ -48,22 +42,10 @@ Place a file like this at `src/test/resources/sample_person.json`:
 }
 ```
 
-## Testing
-Integration tests are provided using JUnit and Testcontainers. These tests:
-- Start a Kafka broker in Docker
-- Send a protobuf message using the CLI logic
-- Consume the message and verify its content
+## Test
 
-To run the tests:
 ```sh
 ./gradlew test
 ```
 
-## Documentation
-- The CLI tool is documented in the code and this README.
-- The integration test (`ProducerConsumerIntegrationTest`) demonstrates end-to-end message flow and validates the solution against the acceptance criteria.
-
----
-
-**This project demonstrates a robust, testable, and maintainable approach to sending protobuf messages to Kafka, with full verification using Testcontainers.**
-
+The integration test starts Kafka in Docker, publishes a protobuf message, consumes it, and verifies the payload.
