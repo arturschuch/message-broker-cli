@@ -21,9 +21,18 @@ public class ProducerCli {
     public Person loadPersonFromJson(String jsonPath) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(new File(jsonPath));
+        JsonNode name = root.get("name");
+        JsonNode id = root.get("id");
+        if (name == null || name.asText().isBlank()) {
+            throw new IllegalArgumentException("JSON must include a non-empty 'name' field");
+        }
+        if (id == null) {
+            throw new IllegalArgumentException("JSON must include an 'id' field");
+        }
+
         Person.Builder builder = Person.newBuilder()
-                .setName(root.path("name").asText())
-                .setId(root.path("id").asInt());
+                .setName(name.asText())
+                .setId(id.asInt());
         if (root.has("email")) {
             builder.setEmail(root.get("email").asText());
         }
@@ -37,7 +46,7 @@ public class ProducerCli {
             ProducerRecord<String, byte[]> record =
                     new ProducerRecord<>(topic, String.valueOf(person.getId()), person.toByteArray());
             RecordMetadata meta = producer.send(record).get();
-            log.info("Sent Person{{}} to {}[{}]@{}", person, meta.topic(), meta.partition(), meta.offset());
+            log.info("Sent Person {} to {}[{}]@{}", person, meta.topic(), meta.partition(), meta.offset());
         }
     }
 
